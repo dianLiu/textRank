@@ -3,12 +3,14 @@ package model;
 import java.util.ArrayList;
 import java.util.List;
 
+import net.sf.json.JSONArray;
+
 public class StyleNode {
 
 	private int count;
 	private String styleName;
 	private List<ElementNode> EList;
-	public double sImportance = Double.NaN;
+	private double sImportance = Double.NaN;
 	
 	public StyleNode(){
 		this.count = 1;
@@ -63,20 +65,22 @@ public class StyleNode {
 		
 		for(ElementNode e:EList){
 			str.append("--");
-			str.append(e.toString());
+			str.append(e.getTagName());
+			str.append("=");
+			str.append(e.geteImportance());
+			str.append(e.isNoise());
+			 str.append("---");
+			 str.append(e.isMain());
+			    
+			if(e.getTagName().equals("form")){
+				str.append("\njson");
+				str.append(JSONArray.fromObject(e.getSList()).toString());
+			}
+			str.append("\n");
 		}
 		return str.toString();
 	}
 	
-	private void genernateStyleName(){
-		StringBuilder name = new StringBuilder();
-		for(ElementNode e:this.EList){
-			name.append(e.getTagName());
-			name.append("-");
-		}
-		this.styleName = name.toString();
-	}
-
 	public int getCount() {
 		return count;
 	}
@@ -99,5 +103,13 @@ public class StyleNode {
 
 	public void setEList(List<ElementNode> eList) {
 		EList = eList;
+	}
+
+	public double getsImportance() {
+		return sImportance;
+	}
+
+	public void setsImportance(double sImportance) {
+		this.sImportance = sImportance;
 	}
 }

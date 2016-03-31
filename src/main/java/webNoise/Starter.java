@@ -1,12 +1,11 @@
-
-package textRank.html;
+package webNoise;
 
 import java.io.File;
 
 import util.PropertiesReader;
-import webNoise.NoiseHandler;
 
-public class Main {
+public class Starter {
+
 
 	public static void main(String[] args){
 		String base = PropertiesReader.getValue("siteBase");
@@ -18,5 +17,4 @@ public class Main {
 			noise.removeNoise(f.getAbsolutePath());
 		}
 	}
-	
 }

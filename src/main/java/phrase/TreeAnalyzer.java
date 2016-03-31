@@ -1,10 +1,14 @@
 package phrase;
 
 import java.text.DecimalFormat;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 
 import model.ElementNode;
 import model.StyleNode;
+import net.sf.json.JSONArray;
+import net.sf.json.JSONObject;
 
 public class TreeAnalyzer {
 
@@ -15,25 +19,55 @@ public class TreeAnalyzer {
 	private final DecimalFormat df = new DecimalFormat("#.0000");
 	
 	/**噪声节点阈值 */
-	private final static double NOISE_TL = 0.2;
+	private final static double NOISE_TL = 0.3;
 	
 	public boolean markNoise(ElementNode node){
 	    List<StyleNode> slist = node.getSList();
+	    int nodeNum=0,noiseNum=0;
+	    
 	    for(StyleNode s:slist){
 	    	List<ElementNode> elist = s.getEList();
 	    	for(ElementNode en:elist){
-	    		if(markNoise(en) == false){
-	    			node.setNoise(false);
-	    			return false;
-	    		}
+	    		if(markNoise(en))
+	    			noiseNum++;
+	    		nodeNum++;
 	    	}
 	    }
-	    if(node.eImportance < NOISE_TL){
-	    	node.setNoise(true);
-	    }else{
+	    if(noiseNum == nodeNum){
+	    	node.getSList().clear();
+		    if(node.geteImportance() < NOISE_TL){
+		    	node.setNoise(true);
+		    }else{
+		    	node.setNoise(false);
+		    }
+	    }else if(noiseNum<nodeNum){
 	    	node.setNoise(false);
 	    }
+
 	    return node.isNoise();
+	}
+	
+	public boolean markMain(ElementNode node){
+		 List<StyleNode> slist = node.getSList();
+		 int nodeNum=0,mainNum=0;
+		    
+		 for(StyleNode s:slist){
+		    List<ElementNode> elist = s.getEList();
+		    for(ElementNode en:elist){
+		    	if(markMain(en))
+		    		mainNum++;
+		   		nodeNum++;
+		    }
+		 }
+		 if(nodeNum == 0){
+			 node.setMain(!node.isNoise());
+		 }else if(nodeNum == mainNum){
+			 node.setMain(true);
+			 node.getSList().clear();
+		 }else{
+			 node.setMain(false);
+		 }
+		 return node.isMain();
 	}
 	
 	public void calNodeImp(ElementNode node,int m){
@@ -48,7 +82,7 @@ public class TreeAnalyzer {
 		double nodeImp = calElementNodeImp(node,m);
 		double childrenImp = calChildrenImp(node,m);
 		
-		node.eImportance = format((1-factor)*nodeImp + factor*childrenImp);
+		node.seteImportance(format((1-factor)*nodeImp + factor*childrenImp));
 	}
 	
 	private double calElementNodeImp(ElementNode node,int m){
@@ -57,9 +91,7 @@ public class TreeAnalyzer {
 		List<StyleNode> list = node.getSList();
 		for(StyleNode s:list){
 			p = s.getCount()*1.0/m;
-			if(p < 1){
-				res -= Math.log(m)/Math.log(p);
-			}
+			res -= p*Math.log(p)/Math.log(m);
 		}
 		return format(res);
 	}
@@ -68,11 +100,11 @@ public class TreeAnalyzer {
 		double childrenComp = 0.0,p=0.0;
 		List<StyleNode> list = node.getSList();
 		for(StyleNode sn:list){
-			if(Double.isNaN(sn.sImportance)){
+			if(Double.isNaN(sn.getsImportance())){
 				calStyleNodeImp(sn);
 			}
 			p = sn.getCount()*1.0/m;
-			childrenComp += sn.sImportance*p;
+			childrenComp += sn.getsImportance()*p;
 		}
 		return format(childrenComp);
 	}
@@ -81,21 +113,30 @@ public class TreeAnalyzer {
 		double temp= 0.0;
 		List<ElementNode> eList = sn.getEList();
 		for(ElementNode e:eList){
-			if(Double.isNaN(e.eImportance))
+			if(Double.isNaN(e.geteImportance()))
 				calNodeImp(e,sn.getCount());
-			temp += e.eImportance;
+			temp += e.geteImportance();
 		}
 		temp = temp*1.0/eList.size();
-		sn.sImportance = format(temp);
+		sn.setsImportance(format(temp));
 	}
 	
 	private void calLeafComp(ElementNode en,int m){
-		double p = en.getTextCount()*1.0/m;
-		if(p==1||m==1){
-			en.eImportance = 1;
-		}else{
-			en.eImportance = format(1+ Math.log(m)/Math.log(p));
+		if(m == 1){
+			en.seteImportance(1);
+			return;
 		}
+		
+		HashMap<String, Integer> map = en.getContentMap();
+		double leafComp = 0.0,p;
+		Iterator<String> it = map.keySet().iterator();
+		while(it.hasNext()){
+			int count = map.get(it.next());
+			p = count*1.0/m ;
+			leafComp -= p*Math.log(p)/Math.log(m);
+		}
+		en.seteImportance(leafComp);
+//		System.out.println(en.getTagName()+":"+en.geteImportance()+":"+en.getContentMap().toString());
 	}
 	
 	private double format(double number){

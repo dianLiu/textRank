@@ -11,6 +11,10 @@ public class JsoupTest {
 		Document doc = Jsoup.parse(html);
 		Element body = doc.select("body").first();
 		
-		System.out.println(body.children().size());
+		double p = 0.1;
+		double m = 10;
+		double t = -p*Math.log(p)/Math.log(m);
+		System.out.println(t);
+		//System.out.println(body.children().size());
 	}
 }

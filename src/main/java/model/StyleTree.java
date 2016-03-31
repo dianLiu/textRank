@@ -1,10 +1,19 @@
 package model;
 
+import java.io.Serializable;
+
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+
 import phrase.TreeAnalyzer;
 import phrase.TreeBuilder;
 
-public class StyleTree {
+public class StyleTree implements Serializable{
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	private ElementNode root;
 	private TreeBuilder builder;
 	private TreeAnalyzer analyzer;
@@ -22,12 +31,27 @@ public class StyleTree {
 		this.fileCount ++;
 	}
 	
-	public void summaryTreeNode(){
-		this.analyzer.calNodeImp(root, this.fileCount);
+	public void buildTemplate(){
+		analyzer.calNodeImp(root, this.fileCount);
+		analyzer.markNoise(root);
+		analyzer.markMain(root);
+//		System.out.println(toString());
 	}
 
-	public void markNoise(){
-		this.analyzer.markNoise(root);
+	public Element eliminateNoise(String html){
+		return builder.eliminate(root,html);
+	}
+	
+	public String toString(){
+	    StringBuilder str = new StringBuilder();
+	    str.append(root.getTagName());
+	    str.append(":");
+	    str.append(root.geteImportance());
+	    str.append("\n");
+	    for(StyleNode s:root.getSList()){
+	    	str.append(s.toString());
+	    }
+	    return str.toString();
 	}
 	
 	public ElementNode getRoot() {
