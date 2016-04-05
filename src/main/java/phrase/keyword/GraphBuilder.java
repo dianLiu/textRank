@@ -21,7 +21,10 @@ public class GraphBuilder {
 	}
 	
 	public WordGraph buildGraph(Document doc){
-		String content = doc.text();
+		String title = doc.select("title").first().text();
+		doc.select("title").remove();
+		String content = doc.select("body").first().text();
+//		System.out.println(content);
 		List<Term> list = NLPTokenizer.segment(content);
 		
 		int offset,count,len = list.size();
@@ -44,7 +47,6 @@ public class GraphBuilder {
 				}
 			}
 		}
-		String title = doc.select("title").first().text();
 		weightGraph(title);
 		return this.graph;
 	}
@@ -59,9 +61,8 @@ public class GraphBuilder {
 		for(Term t:list){
 			if(!isMeaning(t))
 				continue;
-			this.graph.addWeight(t.word,1.5);
+			this.graph.addWeight(t.word,1.2);
 		}
-		System.out.println();
 	}
 	
 	private boolean isMeaning(Term t){
@@ -81,7 +82,9 @@ public class GraphBuilder {
 			return false;
 		if(t.nature == Nature.m ||t.nature ==Nature.mq|| t.nature == Nature.q )
 			return false;
-		if(t.nature == Nature.uz ||t.nature ==Nature.cc)
+		if(t.nature == Nature.uz ||t.nature ==Nature.cc ||t.nature ==Nature.ng)
+			return false;
+		if(t.nature == Nature.a)
 			return false;
 		return true;
 	}

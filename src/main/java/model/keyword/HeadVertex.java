@@ -10,6 +10,7 @@ public class HeadVertex {
 
 	private List<Vertex> nodes;
 	private String word;
+	private double impact;
 	private Nature nature;
 	
 	public HeadVertex(String word,Nature nature){
@@ -29,22 +30,33 @@ public class HeadVertex {
 	    }
 	}
 	
+	public double getNodePower() {
+		double nodePower =0.0;
+		for(Vertex v : this.nodes){
+			nodePower += v.getValue();
+		}
+		return nodePower;
+	}
+	
 	public String toString(){
 	    StringBuilder str = new StringBuilder();
 	    str.append(word);
 	    str.append(nature);
-	    str.append(":(");
+	    str.append(impact);
+	    str.append("\n");
+	    
+	    /*str.append(":(");
 	    for(Vertex v:nodes){
 	    	str.append(v.getWord());
 	    	str.append("=");
 	    	str.append(v.getValue());
 	    	str.append(", ");
 	    }
-	    str.append(")");
+	    str.append(")");*/
 	    return str.toString();
 	}
 	
-	private Vertex findVertex(int index){
+	public Vertex findVertex(int index){
 	    for(Vertex v:nodes){
 	    	if(index == v.getIndex())
 	    		return v;
@@ -74,6 +86,14 @@ public class HeadVertex {
 
 	public void setNature(Nature nature) {
 		this.nature = nature;
+	}
+
+	public double getImpact() {
+		return impact;
+	}
+
+	public void setImpact(double impact) {
+		this.impact = impact;
 	}
 	
 }

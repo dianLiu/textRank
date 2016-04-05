@@ -10,6 +10,7 @@ public class WordGraph {
 
 	private List<HeadVertex> nodeList;
 	private HashMap<String, Integer> map;
+	private double power;
 	
 	public WordGraph(){
 		this.nodeList = new ArrayList<HeadVertex>();
@@ -25,13 +26,14 @@ public class WordGraph {
 	}
 	
 	public void addWeight(String word,double w){
-		System.out.print(word+"   ");
+		if(!map.containsKey(word))
+			return;
 		int nodeIndex = map.get(word);
 		HeadVertex start = nodeList.get(nodeIndex);
 		List<Vertex> list = start.getNodes();
 		for(Vertex v:list){
 			v.setValue(w*v.getValue());
-			updateWeight(v,nodeIndex);
+			//updateWeight(v,nodeIndex);
 		}
 	}
 	
@@ -43,6 +45,10 @@ public class WordGraph {
 		}
 	}
 	
+	public int getNodeSize(){
+		return this.nodeList.size();
+	}
+	
 	private void weightOne(HeadVertex h,double w){
 		List<Vertex> list = h.getNodes();
 		
@@ -52,21 +58,12 @@ public class WordGraph {
 		}
 	}
 	
-	private void updateWeight(Vertex v,int index){
-		HeadVertex end = nodeList.get(v.getIndex());
-		List<Vertex> list = end.getNodes();
-		for(Vertex vertex:list){
-			if(vertex.getIndex() == index)
-				vertex.setValue(v.getValue());
-		}
-	}
-	
 	private double calWeight(int len){
 		double w = 1.0;
 	     if(len>=4&&len<=7)
 	    	 w = 1.2;
 	     if(len>7)
-	    	 w=1.4;
+	    	 w=1.3;
 	     return w;
 	}
 	
@@ -105,6 +102,14 @@ public class WordGraph {
 	}
 	public void setMap(HashMap<String, Integer> map) {
 		this.map = map;
+	}
+
+	public double getPower() {
+		return power;
+	}
+
+	public void setPower(double power) {
+		this.power = power;
 	}
 	
 	
